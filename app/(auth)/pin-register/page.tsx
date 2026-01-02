@@ -26,7 +26,7 @@ export default function PinRegisterPage() {
         setStep('first');
         setFirstPin('');
         window.location.reload();
-      }, 1500);
+      }, 3000);
       return;
     }
 
@@ -43,19 +43,23 @@ export default function PinRegisterPage() {
 
       if (response.ok && data.success) {
         toast.success('Code PIN créé avec succès !');
-        router.push('/');
-        router.refresh();
+        setTimeout(() => {
+          router.push('/');
+          router.refresh();
+        }, 500);
       } else {
+        console.error('PIN register failed:', data);
         toast.error(data.error || 'Erreur lors de la création');
         setTimeout(() => {
           window.location.reload();
-        }, 1500);
+        }, 3000);
       }
     } catch (error) {
+      console.error('PIN register error:', error);
       toast.error('Erreur de connexion');
       setTimeout(() => {
         window.location.reload();
-      }, 1500);
+      }, 3000);
     } finally {
       setIsLoading(false);
     }
@@ -73,11 +77,26 @@ export default function PinRegisterPage() {
           </p>
         </div>
 
-        <PinKeyboard
-          onComplete={step === 'first' ? handleFirstPinComplete : handleConfirmPinComplete}
-          length={8}
-          title={isLoading ? "Création..." : step === 'first' ? "Nouveau code PIN" : "Confirmation"}
-        />
+        {!showRetry ? (
+          <PinKeyboard
+            onComplete={step === 'first' ? handleFirstPinComplete : handleConfirmPinComplete}
+            length={8}
+            title={isLoading ? "Création..." : step === 'first' ? "Nouveau code PIN" : "Confirmation"}
+          />
+        ) : (
+          <div className="space-y-4 text-center">
+            <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
+              <p className="text-destructive font-medium">{error}</p>
+              <p className="text-sm text-muted-foreground mt-2">
+                Vérifiez la console (F12) pour plus de détails
+              </p>
+            </div>
+            <Button onClick={handleRetry} className="gap-2">
+              <RefreshCw className="h-4 w-4" />
+              Réessayer
+            </Button>
+          </div>
+        )}
 
         <div className="text-center">
           <Link

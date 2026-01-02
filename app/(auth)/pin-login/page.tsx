@@ -5,14 +5,18 @@ import { useRouter } from 'next/navigation';
 import { PinKeyboard } from '@/components/pin-keyboard';
 import { toast } from 'sonner';
 import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, RefreshCw } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 export default function PinLoginPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [showRetry, setShowRetry] = useState(false);
 
   const handlePinComplete = async (pin: string) => {
     setIsLoading(true);
+    setError(null);
     
     try {
       const response = await fetch('/api/auth/pin-login', {
@@ -25,29 +29,26 @@ export default function PinLoginPage() {
 
       if (response.ok && data.success) {
         toast.success('Connexion réussie !');
-        // Délai avant redirection pour voir les erreurs éventuelles
-        setTimeout(() => {
-          router.push('/');
-          router.refresh();
-        }, 500);
+        router.push('/');
+        router.refresh();
       } else {
         console.error('PIN login failed:', data);
+        setError(data.error || 'Code PIN incorrect');
         toast.error(data.error || 'Code PIN incorrect');
-        // Délai plus long pour voir les erreurs
-        setTimeout(() => {
-          window.location.reload();
-        }, 3000);
+        setShowRetry(true);
       }
     } catch (error) {
       console.error('PIN login error:', error);
+      setError('Erreur de connexion au serveur');
       toast.error('Erreur de connexion');
-      // Délai plus long pour voir les erreurs
-      setTimeout(() => {
-        window.location.reload();
-      }, 3000);
+      setShowRetry(true);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleRetry = () => {
+    window.location.reload();
   };
 
   return (
@@ -60,11 +61,26 @@ export default function PinLoginPage() {
           </p>
         </div>
 
-        <PinKeyboard
-          onComplete={handlePinComplete}
-          length={8}
-          title={isLoading ? "Vérification..." : "Code PIN"}
-        />
+        {!showRetry ? (
+          <PinKeyboard
+            onComplete={handlePinComplete}
+            length={8}
+            title={isLoading ? "Vérification..." : "Code PIN"}
+          />
+        ) : (
+          <div className="space-y-4 text-center">
+            <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
+              <p className="text-destructive font-medium">{error}</p>
+              <p className="text-sm text-muted-foreground mt-2">
+                Vérifiez la console (F12) pour plus de détails
+              </p>
+            </div>
+            <Button onClick={handleRetry} className="gap-2">
+              <RefreshCw className="h-4 w-4" />
+              Réessayer
+            </Button>
+          </div>
+        )}
 
         <div className="text-center space-y-2">
           <Link
