@@ -4,9 +4,29 @@ import { useSession, signOut } from '@/lib/auth-client';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { LogOut, User, Loader2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 
 export function UserNav() {
   const { data: session, isPending } = useSession();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      // Déconnexion Better-Auth
+      await signOut();
+      
+      // Déconnexion PIN (supprimer les cookies)
+      await fetch('/api/auth/pin-logout', { method: 'POST' });
+      
+      toast.success('Déconnecté avec succès');
+      router.push('/pin-login');
+      router.refresh();
+    } catch (error) {
+      console.error('Logout error:', error);
+      toast.error('Erreur lors de la déconnexion');
+    }
+  };
 
   if (isPending) {
     return (
@@ -43,7 +63,7 @@ export function UserNav() {
       <Button
         variant="ghost"
         size="icon"
-        onClick={() => signOut()}
+        onClick={handleLogout}
         title="Se déconnecter"
       >
         <LogOut className="h-4 w-4" />
