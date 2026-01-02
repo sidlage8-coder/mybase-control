@@ -56,16 +56,17 @@ RUN chown nextjs:nodejs .next
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
+# Copier les scripts, migrations et node_modules nécessaires
+COPY --from=builder --chown=nextjs:nodejs /app/scripts ./scripts
+COPY --from=builder --chown=nextjs:nodejs /app/drizzle ./drizzle
+COPY --from=builder --chown=nextjs:nodejs /app/package.json ./package.json
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
+
 # Passer à l'utilisateur non-root
 USER nextjs
 
 # Exposer le port
 EXPOSE 3000
-
-# Copier les scripts et migrations
-COPY --from=builder --chown=nextjs:nodejs /app/scripts ./scripts
-COPY --from=builder --chown=nextjs:nodejs /app/drizzle ./drizzle
-COPY --from=builder --chown=nextjs:nodejs /app/package.json ./package.json
 
 # Lancer le serveur avec migrations
 CMD ["sh", "-c", "node scripts/migrate.js && node server.js"]
