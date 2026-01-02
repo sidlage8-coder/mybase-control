@@ -4,8 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { PinKeyboard } from '@/components/pin-keyboard';
 import { toast } from 'sonner';
-import { RefreshCw } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { RefreshCw, Shield, AlertTriangle } from 'lucide-react';
 
 export default function PinLoginPage() {
   const router = useRouter();
@@ -51,38 +50,60 @@ export default function PinLoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <div className="w-full max-w-md space-y-6">
-        <div className="text-center space-y-2">
-          <h1 className="text-3xl font-bold">Branch</h1>
-          <p className="text-muted-foreground">
-            Entrez votre code PIN à 8 chiffres
-          </p>
+    <div className="min-h-screen flex items-center justify-center p-4">
+      <div className="w-full max-w-md space-y-8">
+        
+        {/* Logo et titre - Style équipement */}
+        <div className="text-center space-y-4">
+          <div className="inline-flex items-center justify-center w-20 h-20 neu-card">
+            <Shield className="w-10 h-10 text-[var(--led-purple)]" style={{ filter: 'drop-shadow(0 0 10px var(--led-purple-glow))' }} />
+          </div>
+          <div>
+            <h1 className="text-4xl font-bold tracking-tight text-[var(--foreground)]">
+              BRANCH
+            </h1>
+            <p className="text-sm font-mono tracking-widest text-[var(--muted-foreground)] mt-1">
+              SYSTÈME DE CONTRÔLE
+            </p>
+          </div>
         </div>
 
         {!showRetry ? (
           <PinKeyboard
             onComplete={handlePinComplete}
             length={8}
-            title={isLoading ? "Vérification..." : "Code PIN"}
+            title={isLoading ? "VÉRIFICATION..." : "AUTHENTIFICATION"}
           />
         ) : (
-          <div className="space-y-4 text-center">
-            <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
-              <p className="text-destructive font-medium">{error}</p>
-              <p className="text-sm text-muted-foreground mt-2">
-                Vérifiez la console (F12) pour plus de détails
+          <div className="neu-card p-8 space-y-6">
+            {/* Écran d'erreur style LCD */}
+            <div className="neu-inset-deep p-6 text-center space-y-3">
+              <AlertTriangle 
+                className="w-12 h-12 mx-auto text-[var(--led-red)]" 
+                style={{ filter: 'drop-shadow(0 0 15px var(--led-red-glow))' }}
+              />
+              <p className="text-[var(--led-red)] font-mono text-sm text-glow">
+                {error}
               </p>
             </div>
-            <Button onClick={handleRetry} className="gap-2">
-              <RefreshCw className="h-4 w-4" />
+            
+            {/* Bouton Réessayer */}
+            <button
+              onClick={handleRetry}
+              className="w-full neu-button-led h-14 rounded-xl flex items-center justify-center gap-3 text-lg font-medium"
+            >
+              <RefreshCw className="h-5 w-5" />
               Réessayer
-            </Button>
+            </button>
           </div>
         )}
 
-        <div className="text-center text-sm text-muted-foreground">
-          <p>Accès sécurisé par code PIN</p>
+        {/* Footer - Indicateur de sécurité */}
+        <div className="flex items-center justify-center gap-3 text-[var(--muted-foreground)]">
+          <div className="led-dot led-dot-green" />
+          <span className="text-xs font-mono tracking-wider uppercase">
+            Connexion Sécurisée
+          </span>
         </div>
       </div>
     </div>

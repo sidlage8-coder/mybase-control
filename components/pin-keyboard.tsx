@@ -1,9 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Shuffle, Delete } from 'lucide-react';
+import { Shuffle, Delete, RotateCcw } from 'lucide-react';
 
 interface PinKeyboardProps {
   onComplete: (pin: string) => void;
@@ -11,11 +9,11 @@ interface PinKeyboardProps {
   title?: string;
 }
 
-export function PinKeyboard({ onComplete, length = 8, title = "Entrez votre code" }: PinKeyboardProps) {
+export function PinKeyboard({ onComplete, length = 8, title = "CODE PIN" }: PinKeyboardProps) {
   const [pin, setPin] = useState<string>('');
   const [keys, setKeys] = useState<number[]>([]);
+  const [pressedKey, setPressedKey] = useState<number | null>(null);
 
-  // Mélanger les touches au chargement et à chaque demande
   const shuffleKeys = () => {
     const numbers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
     const shuffled = [...numbers].sort(() => Math.random() - 0.5);
@@ -34,6 +32,8 @@ export function PinKeyboard({ onComplete, length = 8, title = "Entrez votre code
 
   const handleKeyPress = (key: number) => {
     if (pin.length < length) {
+      setPressedKey(key);
+      setTimeout(() => setPressedKey(null), 150);
       setPin(prev => prev + key);
     }
   };
@@ -47,79 +47,129 @@ export function PinKeyboard({ onComplete, length = 8, title = "Entrez votre code
   };
 
   return (
-    <Card className="w-full max-w-md mx-auto">
-      <CardHeader>
-        <CardTitle className="text-center">{title}</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        {/* Affichage du PIN */}
-        <div className="flex justify-center gap-2">
+    <div className="w-full max-w-md mx-auto">
+      {/* Châssis principal - Équipement Hardware */}
+      <div className="neu-card p-8 space-y-8">
+        
+        {/* Écran LCD - Affichage du titre */}
+        <div className="text-center">
+          <div className="inline-block px-6 py-2 neu-inset">
+            <span className="text-xs font-mono tracking-[0.3em] text-[var(--led-purple)] text-glow uppercase">
+              {title}
+            </span>
+          </div>
+        </div>
+
+        {/* Écran LCD principal - Affichage du PIN */}
+        <div className="neu-inset-deep p-6">
+          <div className="flex justify-center gap-3">
+            {Array.from({ length }).map((_, i) => (
+              <div
+                key={i}
+                className={`
+                  w-8 h-10 rounded-md flex items-center justify-center text-2xl font-bold
+                  transition-all duration-200
+                  ${i < pin.length
+                    ? 'text-[var(--led-cyan)] text-glow'
+                    : 'text-[var(--surface-mid)]'
+                  }
+                `}
+                style={{
+                  textShadow: i < pin.length 
+                    ? '0 0 10px var(--led-cyan-glow), 0 0 20px var(--led-cyan-glow)' 
+                    : 'none'
+                }}
+              >
+                {i < pin.length ? '●' : '○'}
+              </div>
+            ))}
+          </div>
+          
+          {/* Barre de progression LED */}
+          <div className="mt-4 neu-progress-track h-2">
+            <div
+              className="neu-progress-bar h-2 transition-all duration-300"
+              style={{ width: `${(pin.length / length) * 100}%` }}
+            />
+          </div>
+        </div>
+
+        {/* Clavier numérique - Boutons physiques */}
+        <div className="grid grid-cols-3 gap-4">
+          {keys.map((key) => (
+            <button
+              key={key}
+              onClick={() => handleKeyPress(key)}
+              disabled={pin.length >= length}
+              className={`
+                h-16 text-2xl font-bold rounded-xl
+                transition-all duration-150 select-none
+                ${pressedKey === key 
+                  ? 'neu-button pressed text-[var(--led-purple)]' 
+                  : 'neu-button text-[var(--foreground)] hover:text-[var(--led-purple)]'
+                }
+                disabled:opacity-40 disabled:cursor-not-allowed
+              `}
+            >
+              <span className={pressedKey === key ? 'text-glow' : ''}>
+                {key}
+              </span>
+            </button>
+          ))}
+        </div>
+
+        {/* Boutons de contrôle - Style hardware */}
+        <div className="grid grid-cols-3 gap-3">
+          {/* Bouton Mélanger */}
+          <button
+            onClick={shuffleKeys}
+            className="neu-button h-12 px-4 flex items-center justify-center gap-2 text-sm font-medium text-[var(--muted-foreground)] hover:text-[var(--led-blue)]"
+          >
+            <Shuffle className="h-4 w-4" />
+            <span className="hidden sm:inline">Mélanger</span>
+          </button>
+          
+          {/* Bouton Effacer */}
+          <button
+            onClick={handleDelete}
+            disabled={pin.length === 0}
+            className="neu-button h-12 px-4 flex items-center justify-center gap-2 text-sm font-medium text-[var(--muted-foreground)] hover:text-[var(--led-orange)] disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            <Delete className="h-4 w-4" />
+            <span className="hidden sm:inline">Effacer</span>
+          </button>
+          
+          {/* Bouton Reset - LED Rouge */}
+          <button
+            onClick={handleClear}
+            disabled={pin.length === 0}
+            className={`
+              h-12 px-4 flex items-center justify-center gap-2 text-sm font-medium rounded-xl
+              transition-all duration-150
+              ${pin.length > 0 
+                ? 'bg-gradient-to-b from-[var(--led-red)] to-[#dc2626] text-white shadow-[var(--shadow-outset),0_0_15px_var(--led-red-glow)] hover:shadow-[var(--shadow-outset),0_0_25px_var(--led-red-glow)]' 
+                : 'neu-button text-[var(--muted-foreground)] opacity-40 cursor-not-allowed'
+              }
+            `}
+          >
+            <RotateCcw className="h-4 w-4" />
+            <span className="hidden sm:inline">Reset</span>
+          </button>
+        </div>
+
+        {/* LED Indicateur de statut */}
+        <div className="flex justify-center gap-2 pt-2">
           {Array.from({ length }).map((_, i) => (
             <div
               key={i}
-              className={`w-12 h-12 rounded-lg border-2 flex items-center justify-center text-2xl font-bold transition-all ${
-                i < pin.length
-                  ? 'bg-primary border-primary text-primary-foreground'
-                  : 'bg-muted border-muted-foreground/20'
-              }`}
-            >
-              {i < pin.length ? '•' : ''}
-            </div>
+              className={`
+                w-2 h-2 rounded-full transition-all duration-300
+                ${i < pin.length ? 'led-dot led-dot-green' : 'led-dot led-dot-off'}
+              `}
+            />
           ))}
         </div>
-
-        {/* Clavier numérique */}
-        <div className="grid grid-cols-3 gap-3">
-          {keys.map((key) => (
-            <Button
-              key={key}
-              variant="outline"
-              size="lg"
-              className="h-16 text-2xl font-bold hover:bg-primary hover:text-primary-foreground transition-all"
-              onClick={() => handleKeyPress(key)}
-              disabled={pin.length >= length}
-            >
-              {key}
-            </Button>
-          ))}
-        </div>
-
-        {/* Actions */}
-        <div className="grid grid-cols-3 gap-3">
-          <Button
-            variant="outline"
-            onClick={shuffleKeys}
-            className="flex items-center gap-2"
-          >
-            <Shuffle className="h-4 w-4" />
-            Mélanger
-          </Button>
-          <Button
-            variant="outline"
-            onClick={handleDelete}
-            disabled={pin.length === 0}
-            className="flex items-center gap-2"
-          >
-            <Delete className="h-4 w-4" />
-            Effacer
-          </Button>
-          <Button
-            variant="destructive"
-            onClick={handleClear}
-            disabled={pin.length === 0}
-          >
-            Réinitialiser
-          </Button>
-        </div>
-
-        {/* Indicateur de progression */}
-        <div className="w-full bg-muted rounded-full h-2">
-          <div
-            className="bg-primary h-2 rounded-full transition-all duration-300"
-            style={{ width: `${(pin.length / length) * 100}%` }}
-          />
-        </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
