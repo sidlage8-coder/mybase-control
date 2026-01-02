@@ -4,8 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { PinKeyboard } from '@/components/pin-keyboard';
 import { toast } from 'sonner';
-import Link from 'next/link';
-import { ArrowLeft, RefreshCw } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export default function PinLoginPage() {
@@ -82,23 +81,8 @@ export default function PinLoginPage() {
           </div>
         )}
 
-        <div className="text-center space-y-2">
-          <Link
-            href="/pin-register"
-            className="text-sm text-primary hover:underline inline-flex items-center gap-2"
-          >
-            Créer un nouveau code PIN
-          </Link>
-          
-          <div className="pt-4">
-            <Link
-              href="/login"
-              className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-2"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Retour à la connexion classique
-            </Link>
-          </div>
+        <div className="text-center text-sm text-muted-foreground">
+          <p>Accès sécurisé par code PIN</p>
         </div>
       </div>
     </div>

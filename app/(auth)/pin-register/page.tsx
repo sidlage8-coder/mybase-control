@@ -34,7 +34,7 @@ export default function PinRegisterPage() {
     setError(null);
 
     try {
-      const response = await fetch('/api/pin-register', {
+      const response = await fetch('/api/auth/pin-register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ pin }),
@@ -52,8 +52,8 @@ export default function PinRegisterPage() {
         toast.error(data.error || 'Erreur lors de la création');
         setShowRetry(true);
       }
-    } catch (err) {
-      console.error('PIN register error:', err);
+    } catch (error) {
+      console.error('PIN register error:', error);
       setError('Erreur de connexion au serveur');
       toast.error('Erreur de connexion');
       setShowRetry(true);
@@ -78,26 +78,11 @@ export default function PinRegisterPage() {
           </p>
         </div>
 
-        {!showRetry ? (
-          <PinKeyboard
-            onComplete={step === 'first' ? handleFirstPinComplete : handleConfirmPinComplete}
-            length={8}
-            title={isLoading ? "Création..." : step === 'first' ? "Nouveau code PIN" : "Confirmation"}
-          />
-        ) : (
-          <div className="space-y-4 text-center">
-            <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
-              <p className="text-destructive font-medium">{error}</p>
-              <p className="text-sm text-muted-foreground mt-2">
-                Vérifiez la console (F12) pour plus de détails
-              </p>
-            </div>
-            <Button onClick={handleRetry} className="gap-2">
-              <RefreshCw className="h-4 w-4" />
-              Réessayer
-            </Button>
-          </div>
-        )}
+        <PinKeyboard
+          onComplete={step === 'first' ? handleFirstPinComplete : handleConfirmPinComplete}
+          length={8}
+          title={isLoading ? "Création..." : step === 'first' ? "Nouveau code PIN" : "Confirmation"}
+        />
 
         <div className="text-center">
           <Link
