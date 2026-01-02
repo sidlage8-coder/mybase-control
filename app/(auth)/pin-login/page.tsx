@@ -25,20 +25,26 @@ export default function PinLoginPage() {
 
       if (response.ok && data.success) {
         toast.success('Connexion réussie !');
-        router.push('/');
-        router.refresh();
+        // Délai avant redirection pour voir les erreurs éventuelles
+        setTimeout(() => {
+          router.push('/');
+          router.refresh();
+        }, 500);
       } else {
+        console.error('PIN login failed:', data);
         toast.error(data.error || 'Code PIN incorrect');
-        // Recharger la page pour réinitialiser le clavier
+        // Délai plus long pour voir les erreurs
         setTimeout(() => {
           window.location.reload();
-        }, 1500);
+        }, 3000);
       }
     } catch (error) {
+      console.error('PIN login error:', error);
       toast.error('Erreur de connexion');
+      // Délai plus long pour voir les erreurs
       setTimeout(() => {
         window.location.reload();
-      }, 1500);
+      }, 3000);
     } finally {
       setIsLoading(false);
     }
