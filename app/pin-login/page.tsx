@@ -19,7 +19,7 @@ export default function PinLoginPage() {
     setError(null);
     
     try {
-      const response = await fetch('/api/auth/pin-login', {
+      const response = await fetch('/api/pin-login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ pin }),

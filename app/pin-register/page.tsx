@@ -34,7 +34,7 @@ export default function PinRegisterPage() {
     setError(null);
 
     try {
-      const response = await fetch('/api/auth/pin-register', {
+      const response = await fetch('/api/pin-register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ pin }),

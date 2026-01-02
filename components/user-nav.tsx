@@ -17,7 +17,7 @@ export function UserNav() {
       await signOut();
       
       // Déconnexion PIN (supprimer les cookies)
-      await fetch('/api/auth/pin-logout', { method: 'POST' });
+      await fetch('/api/pin-logout', { method: 'POST' });
       
       toast.success('Déconnecté avec succès');
       router.push('/pin-login');
