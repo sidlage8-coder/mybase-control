@@ -5,13 +5,16 @@ import { useRouter } from 'next/navigation';
 import { PinKeyboard } from '@/components/pin-keyboard';
 import { toast } from 'sonner';
 import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, RefreshCw } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 export default function PinRegisterPage() {
   const router = useRouter();
   const [step, setStep] = useState<'first' | 'confirm'>('first');
   const [firstPin, setFirstPin] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [showRetry, setShowRetry] = useState(false);
 
   const handleFirstPinComplete = (pin: string) => {
     setFirstPin(pin);
@@ -22,15 +25,13 @@ export default function PinRegisterPage() {
   const handleConfirmPinComplete = async (pin: string) => {
     if (pin !== firstPin) {
       toast.error('Les codes PIN ne correspondent pas');
-      setTimeout(() => {
-        setStep('first');
-        setFirstPin('');
-        window.location.reload();
-      }, 3000);
+      setError('Les codes PIN ne correspondent pas');
+      setShowRetry(true);
       return;
     }
 
     setIsLoading(true);
+    setError(null);
 
     try {
       const response = await fetch('/api/auth/pin-register', {
@@ -43,26 +44,26 @@ export default function PinRegisterPage() {
 
       if (response.ok && data.success) {
         toast.success('Code PIN créé avec succès !');
-        setTimeout(() => {
-          router.push('/');
-          router.refresh();
-        }, 500);
+        router.push('/');
+        router.refresh();
       } else {
         console.error('PIN register failed:', data);
+        setError(data.error || 'Erreur lors de la création');
         toast.error(data.error || 'Erreur lors de la création');
-        setTimeout(() => {
-          window.location.reload();
-        }, 3000);
+        setShowRetry(true);
       }
-    } catch (error) {
-      console.error('PIN register error:', error);
+    } catch (err) {
+      console.error('PIN register error:', err);
+      setError('Erreur de connexion au serveur');
       toast.error('Erreur de connexion');
-      setTimeout(() => {
-        window.location.reload();
-      }, 3000);
+      setShowRetry(true);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleRetry = () => {
+    window.location.reload();
   };
 
   return (
