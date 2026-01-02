@@ -11,11 +11,12 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Check for session cookie
+  // Check for session cookie (Better-Auth ou PIN)
   const sessionCookie = request.cookies.get("better-auth.session_token");
+  const pinSession = request.cookies.get("pin-session");
 
-  if (!sessionCookie) {
-    const loginUrl = new URL("/login", request.url);
+  if (!sessionCookie && !pinSession) {
+    const loginUrl = new URL("/pin-login", request.url);
     loginUrl.searchParams.set("callbackUrl", pathname);
     return NextResponse.redirect(loginUrl);
   }

@@ -12,6 +12,7 @@ export const user = pgTable("user", {
   emailVerified: boolean("email_verified").notNull().default(false),
   image: text("image"),
   role: text("role").notNull().default("user"), // admin, user, viewer
+  pinCode: text("pin_code"), // Code PIN hashé (SHA256)
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
