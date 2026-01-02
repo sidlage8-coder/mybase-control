@@ -62,5 +62,10 @@ USER nextjs
 # Exposer le port
 EXPOSE 3000
 
-# Lancer le serveur
-CMD ["node", "server.js"]
+# Copier les scripts et migrations
+COPY --from=builder --chown=nextjs:nodejs /app/scripts ./scripts
+COPY --from=builder --chown=nextjs:nodejs /app/drizzle ./drizzle
+COPY --from=builder --chown=nextjs:nodejs /app/package.json ./package.json
+
+# Lancer le serveur avec migrations
+CMD ["sh", "-c", "node scripts/migrate.js && node server.js"]
